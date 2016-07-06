@@ -1,0 +1,223 @@
+<!doctype html>
+<html>
+
+<head>
+  <title>Grapher</title>
+  <style>
+    /* None! */
+  </style>
+</head>
+
+<body>
+  <h1>Hi!</h1>
+  <div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+  <script type="text/javascript" src="/chart.js"></script>
+  <script>
+    var socket = io();
+
+    $(function() {
+      $(document).ready(function() {
+        Highcharts.setOptions({
+          global: {
+            useUTC: false
+          }
+        });
+
+        $('#container').highcharts({
+          chart: {
+            type: 'spline',
+            animation: Highcharts.svg, // don't animate in old IE
+            marginRight: 10,
+            events: {
+              load: function() {
+                var temp = this.series[0];
+                var pressure = this.series[1];
+                socket.on("ping", function(data) {
+                  var time = (new Date).getTime()
+                  if (data) {
+                    if (data["temp"]) {
+                      temp.addPoint([time, parseInt(data['temp'])], true, true)
+                    }
+                    if (data["pressure"]) {
+                      pressure.addPoint([time, parseInt(data['pressure'])], true, true)
+                    }
+                  }
+                })
+              }
+            }
+          },
+          title: {
+            text: 'Graph'
+          },
+          xAxis: {
+            type: 'datetime',
+            tickPixelInterval: 150
+          },
+          /*
+          yAxis: [{
+            labels: {
+                format: '{value}%',
+                style: {
+                    color: '#808080'
+                }
+            },
+            title: {
+                text: 'Humidity',
+                style: {
+                    color: '#808080'
+                }
+            },
+            plotLines: [{
+              value: 0,
+              width: 1,
+              color: '#808080'
+            }],
+            opposite: false
+
+        }, {
+            labels: {
+                format: '{value}°C',
+                style: {
+                    color: '#808080'
+                }
+            },
+            title: {
+                text: 'Temperature',
+                style: {
+                    color: '#808080'
+                }
+            },
+            plotLines: [{
+              value: 0,
+              width: 1,
+              color: '#808080'
+            }],
+            opposite: false
+
+        }, {
+            labels: {
+                format: '{value} mb',
+                style: {
+                    color: '#808080'
+                }
+            },
+            title: {
+                text: 'Pressure',
+                style: {
+                    color: '#808080'
+                }
+            },
+            plotLines: [{
+              value: 0,
+              width: 1,
+              color: '#808080'
+            }],
+            opposite: false,
+            gridLineWidth: 0
+        } ],*/
+          yAxis: [{
+            labels: {
+              enabled: false
+            },
+            lineWidth: 0,
+            minorGridLineWidth: 0,
+            lineColor: 'transparent',
+            minorTickLength: 0,
+            tickLength: 0
+          }, {
+            labels: {
+              enabled: false
+            },
+            lineWidth: 0,
+            minorGridLineWidth: 0,
+            lineColor: 'transparent',
+            minorTickLength: 0,
+            tickLength: 0
+          }, {
+            labels: {
+              enabled: false
+            },
+            lineWidth: 0,
+            minorGridLineWidth: 0,
+            lineColor: 'transparent',
+            minorTickLength: 0,
+            tickLength: 0
+          }],
+          tooltip: {
+            shared: true,
+            /*formatter: function() {
+              return '<b>' + this.series.name + '</b><br/>' +
+                Highcharts.dateFormat('%H:%M:%S', this.x) + ' - ' + Highcharts.numberFormat(this.y, 2) + ' °C';
+            }*/
+          },
+          legend: {
+            layout: 'vertical',
+            align: 'left',
+            x: 120,
+            verticalAlign: 'top',
+            y: 55,
+            floating: true,
+          },
+          exporting: {
+            enabled: false
+          },
+          series: [{
+            name: 'Temperature (°C)',
+            yAxis: 1,
+            data: (function() {
+              // generate an array of random data
+              var data = [],
+                time = (new Date()).getTime(),
+                i;
+
+              for (i = -19; i <= 0; i += 1) {
+                data.push({
+                  x: time + i * 1000,
+                  y: 0
+                });
+              }
+              return data;
+            }())
+          }, {
+            name: 'Pressure (mb)',
+            yAxis: 2,
+            data: (function() {
+              // generate an array of random data
+              var data = [],
+                time = (new Date()).getTime(),
+                i;
+
+              for (i = -19; i <= 0; i += 1) {
+                data.push({
+                  x: time + i * 1000,
+                  y: 0
+                });
+              }
+              return data;
+            }())
+          }, {
+            name: 'Humidity (%)',
+            data: (function() {
+              // generate an array of random data
+              var data = [],
+                time = (new Date()).getTime(),
+                i;
+
+              for (i = -19; i <= 0; i += 1) {
+                data.push({
+                  x: time + i * 1000,
+                  y: 0
+                });
+              }
+              return data;
+            }())
+          }]
+        });
+      });
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,277 @@
+<!doctype html>
+<html>
+
+<head>
+  <title>Grapher</title>
+  <style>
+    /* None! */
+  </style>
+</head>
+
+<body>
+  <main>
+    <input id="tab1" type="radio" name="tabs" checked>
+    <label for="tab1">Temperature (<span id="temp"> </span> °C)</label>
+      
+    <input id="tab2" type="radio" name="tabs">
+    <label for="tab2">Humidity (<span id="humidity"> </span>%)</label>
+      
+    <input id="tab3" type="radio" name="tabs">
+    <label for="tab3">Pressure (<span id="pressure"> </span> mb)</label>
+
+    <section id="content1">
+    <div id="container-temp" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+    </section>
+    <section id="content2">
+    <div id="container-humidity"></div>
+    </section>
+    <section id="content3">
+    <div id="container-pressure"></div>
+    </section>
+
+  </main>
+
+  <link href="css.css" rel="stylesheet" type="text/css" />
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+  <script type="text/javascript" src="/chart.js"></script>
+  <script>
+    var socket = io();
+
+    $(function() {
+      $(document).ready(function() {
+        Highcharts.setOptions({
+          global: {
+            useUTC: false
+          }
+        });
+
+        $('#container-temp').highcharts({
+          chart: {
+            type: 'spline',
+            animation: Highcharts.svg, // don't animate in old IE
+            marginRight: 10,
+            events: {
+              load: function() {
+                var temp = this.series[0];
+                socket.on("ping", function(data) {
+                  document.getElementById("temp").innerHTML = parseInt(data['temp'])
+                  document.getElementById("humidity").innerHTML = parseInt(data['humidity'])
+                  document.getElementById("pressure").innerHTML = parseInt(data['pressure'])
+                  var time = (new Date).getTime()
+                  if (data) {
+                    if (data["temp"]) {
+                      temp.addPoint([time, parseInt(data['temp'])], true, true)
+                    }
+                  }
+                })
+              }
+            }
+          },
+          title: {
+            text: 'Temperature Graph'
+          },
+          xAxis: {
+            type: 'datetime',
+            tickPixelInterval: 150
+          },
+          yAxis: [{
+            labels: {
+                format: '{value} °C',
+                style: {
+                    color: '#808080'
+                }
+            },
+            title: {
+                text: 'Temperature (°C)',
+                style: {
+                    color: '#808080'
+                }
+            },
+            plotLines: [{
+              value: 0,
+              width: 1,
+              color: '#808080'
+            }],
+            opposite: false
+        }],
+          tooltip: {
+            formatter: function() {
+              return '<b>' + this.series.name + '</b><br/>' +
+                Highcharts.dateFormat('%H:%M:%S', this.x) + ' - ' + Highcharts.numberFormat(this.y, 2) + ' °C';
+            }
+          },
+          exporting: {
+            enabled: false
+          },  
+          series: [{
+            name: 'Temperature (°C)',
+            data: (function() {
+              // generate an array of random data
+              var data = [],
+                time = (new Date()).getTime(),
+                i;
+
+              for (i = -19; i <= 0; i += 1) {
+                data.push({
+                  x: time + i * 1000,
+                  y: 0
+                });
+              }
+              return data;
+            }())
+          }]
+        });
+        $('#container-humidity').highcharts({
+          chart: {
+            type: 'spline',
+            animation: Highcharts.svg, // don't animate in old IE
+            marginRight: 10,
+            events: {
+              load: function() {
+                var temp = this.series[0];
+                socket.on("ping", function(data) {
+                  var time = (new Date).getTime()
+                  if (data) {
+                    if (data["humidity"]) {
+                      temp.addPoint([time, parseInt(data['humidity'])], true, true)
+                    }
+                  }
+                })
+              }
+            }
+          },
+          title: {
+            text: 'Humidity Graph'
+          },
+          xAxis: {
+            type: 'datetime',
+            tickPixelInterval: 150
+          },
+          yAxis: [{
+            labels: {
+                format: '{value}%',
+                style: {
+                    color: '#808080'
+                }
+            },
+            title: {
+                text: 'Humidity (%)',
+                style: {
+                    color: '#808080'
+                }
+            },
+            plotLines: [{
+              value: 0,
+              width: 1,
+              color: '#808080'
+            }],
+            opposite: false
+        }],
+          tooltip: {
+            formatter: function() {
+              return '<b>' + this.series.name + '</b><br/>' +
+                Highcharts.dateFormat('%H:%M:%S', this.x) + ' - ' + Highcharts.numberFormat(this.y, 2) + ' °C';
+            }
+          },
+          exporting: {
+            enabled: false
+          },  
+          series: [{
+            name: 'Humidity (%)',
+            data: (function() {
+              // generate an array of random data
+              var data = [],
+                time = (new Date()).getTime(),
+                i;
+
+              for (i = -19; i <= 0; i += 1) {
+                data.push({
+                  x: time + i * 1000,
+                  y: 0
+                });
+              }
+              return data;
+            }())
+          }]
+        });
+        $('#container-pressure').highcharts({
+          chart: {
+            type: 'spline',
+            animation: Highcharts.svg, // don't animate in old IE
+            marginRight: 10,
+            events: {
+              load: function() {
+                var temp = this.series[0];
+                socket.on("ping", function(data) {
+                  var time = (new Date).getTime()
+                  if (data) {
+                    if (data["pressure"]) {
+                      temp.addPoint([time, parseInt(data['pressure'])], true, true)
+                    }
+                  }
+                })
+              }
+            }
+          },
+          title: {
+            text: 'Pressure Graph'
+          },
+          xAxis: {
+            type: 'datetime',
+            tickPixelInterval: 150
+          },
+          yAxis: [{
+            labels: {
+                format: '{value} mb',
+                style: {
+                    color: '#808080'
+                }
+            },
+            title: {
+                text: 'Humidity (%)',
+                style: {
+                    color: '#808080'
+                }
+            },
+            plotLines: [{
+              value: 0,
+              width: 1,
+              color: '#808080'
+            }],
+            opposite: false
+        }],
+          tooltip: {
+            formatter: function() {
+              return '<b>' + this.series.name + '</b><br/>' +
+                Highcharts.dateFormat('%H:%M:%S', this.x) + ' - ' + Highcharts.numberFormat(this.y, 2) + ' mb';
+            }
+          },
+          exporting: {
+            enabled: false
+          },  
+          series: [{
+            name: 'Pressure (mb)',
+            data: (function() {
+              // generate an array of random data
+              var data = [],
+                time = (new Date()).getTime(),
+                i;
+
+              for (i = -19; i <= 0; i += 1) {
+                data.push({
+                  x: time + i * 1000,
+                  y: 0
+                });
+              }
+              return data;
+            }())
+          }]
+        });
+      });
+    });
+  </script>
+</body>
+
+</html>
